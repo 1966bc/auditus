@@ -39,7 +39,7 @@ class TestI18n(unittest.TestCase):
 
     def test_the_language_asked_for_wins(self):
         with mock.patch.dict("os.environ", {"LANG": "en_US.UTF-8"}, clear=True):
-            self.assertEqual(I18n("it").get("play"), "Suona")
+            self.assertEqual(I18n("it").get("fit"), "Adatta")
 
     def test_the_system_language_is_used_by_default(self):
         with mock.patch.dict("os.environ", {"LANG": "it_IT.UTF-8"}, clear=True):
@@ -62,13 +62,6 @@ class TestI18n(unittest.TestCase):
     def test_an_unknown_key_fails_at_once(self):
         with self.assertRaises(KeyError):
             I18n("en").get("no_such_sentence")
-
-    def test_accelerators_differ_in_each_language(self):
-        # Open and Play are bound to Alt + their first letter: two equal
-        # letters would make one of the two keys unreachable.
-        for code in I18n.LANGUAGES:
-            i18n = I18n(code)
-            self.assertNotEqual(i18n.get("open")[0].lower(), i18n.get("play")[0].lower(), code)
 
 
 if __name__ == "__main__":

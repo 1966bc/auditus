@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 
+from pitch import Pitch
 from player import Player
 from tools import Tools
 from wav import Wav
@@ -32,9 +33,11 @@ class Engine:
         self.wav = Wav()
         # The sound, through aplay.
         self.player = Player(log)
+        # Note names, in the naming of the language chosen.
+        self.pitch = Pitch(i18n.get("note_names").split(), int(i18n.get("octave_shift")))
 
     def __str__(self):
-        return "class: {0}\nparts: log, i18n, tools, wav, player".format(
+        return "class: {0}\nparts: log, i18n, tools, wav, player, pitch".format(
             self.__class__.__name__)
 
     def get_python_version(self):
@@ -49,6 +52,12 @@ class Engine:
         with open(self.get_file(os.path.join("..", "LICENSE")), "r") as f:
             text = f.read()
         return text
+
+    def get_icon(self, which):
+        """An icon: its file holds one base64 PNG (forge/make_transport_icons.py)."""
+        with open(self.get_file(which), "r") as f:
+            icon = f.readline().strip()
+        return icon
 
     def get_icons(self, which):
         """Every size of an icon: its file holds one base64 PNG per line (make_icon.py)."""

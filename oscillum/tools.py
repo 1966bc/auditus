@@ -162,6 +162,13 @@ class Tools:
                              padding=(6, 4), border=0, relief=tk.FLAT,
                              font="TkDefaultFont")
 
+        # The time of the cursor: fixed width, so the digits do not dance
+        # while they change, and larger, because it is read from a distance.
+        fixed = font.nametofont("TkFixedFont")
+        self.style.configure("Time.TLabel",
+                             foreground=focus,
+                             font=(fixed.cget("family"), base.cget("size") + 5, "bold"))
+
         self.style.configure("Title.TLabel",
                              font=(base.cget("family"), base.cget("size") + 6, "bold"))
         self.style.configure("Link.TLabel",

@@ -160,6 +160,13 @@ class SpectrumCanvas(tk.Canvas):
 
         frequency, level = self.get_peak(frequencies, levels)
         if level > self.FLOOR + 10:
-            self.create_text(self.winfo_width() - self.RIGHT_MARGIN, self.TOP_MARGIN,
+            right = self.winfo_width() - self.RIGHT_MARGIN
+            self.create_text(right, self.TOP_MARGIN,
                              anchor=tk.NE, fill=tools.get_rgb(*tools.FOREGROUND),
                              text=self.engine.i18n.get("peak_at").format(frequency, level))
+            # The note of the peak, as a tuner would say it.
+            name, cents = self.engine.pitch.get_note(frequency)
+            self.create_text(right, self.TOP_MARGIN + 18,
+                             anchor=tk.NE, fill=tools.get_rgb(*tools.FOCUS),
+                             font=("TkDefaultFont", 13, "bold"),
+                             text=self.engine.i18n.get("note_at").format(name, cents))

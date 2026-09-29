@@ -43,10 +43,7 @@ class I18n:
         "python": ("Python", "Python"),
         "tkinter": ("Tkinter", "Tkinter"),
 
-        # the toolbar
-        "open": ("Open", "Apri"),
-        "play": ("Play", "Suona"),
-        "stop": ("Stop", "Ferma"),
+        # the toolbar: the transport buttons are icons, they need no words
         "oscilloscope": ("Oscilloscope", "Oscilloscopio"),
         "fit": ("Fit", "Adatta"),
 
@@ -58,11 +55,19 @@ class I18n:
         "view": ("view x{0:.1f} ({1:+.0f} dB)", "vista x{0:.1f} ({1:+.0f} dB)"),
         "division": ("{0} ms, {1:g} ms per division", "{0} ms, {1:g} ms per divisione"),
         "peak_at": ("peak {0:.1f} Hz, {1:.1f} dBFS", "picco {0:.1f} Hz, {1:.1f} dBFS"),
+        "note_at": ("{0} {1:+d} cents", "{0} {1:+d} cent"),
+
+        # the notes: the twelve names from C, and how octaves are numbered
+        # (the A at 440 Hz is A4 in English, La3 in Italian: pitch.py)
+        "note_names": ("C C# D D# E F F# G G# A A# B",
+                       "Do Do# Re Re# Mi Fa Fa# Sol Sol# La La# Si"),
+        "octave_shift": ("0", "-1"),
 
         # the status bar and the file
-        "ready": ("Open a WAV file: File, Open... or Alt+{0}",
-                  "Apri un file WAV: File, Apri... oppure Alt+{0}"),
-        "cursor": ("cursor {0:.2f} s", "cursore {0:.2f} s"),
+        "ready": ("Open a WAV file: File, Open... or Ctrl+O. Space plays and pauses, "
+                  "Home goes to the start, Esc stops.",
+                  "Apri un file WAV: File, Apri... oppure Ctrl+O. Spazio suona e mette in "
+                  "pausa, Home torna all'inizio, Esc ferma."),
         "file_info": ("{0}   {1} Hz, {2}, {3:.1f} s, peak {4:.1f} dBFS",
                       "{0}   {1} Hz, {2}, {3:.1f} s, picco {4:.1f} dBFS"),
         "mono": ("mono", "mono"),

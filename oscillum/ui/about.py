@@ -37,13 +37,18 @@ class UI(tk.Toplevel):
 
         frm_main = ttk.Frame(self, style="App.TFrame", padding=16)
 
+        # The largest of the icon's sizes. Kept on self: a PhotoImage that only
+        # a local variable points to is collected, and the label goes blank.
+        self.icon = tk.PhotoImage(data=self.engine.get_icons("app")[-1])
+        ttk.Label(frm_main, image=self.icon).grid(row=0, column=0, rowspan=2,
+                                                  sticky=tk.N, padx=(0, 12))
         ttk.Label(frm_main, style="Title.TLabel",
-                  text=self.info["name"]).grid(row=0, column=0, sticky=tk.W)
+                  text=self.info["name"]).grid(row=0, column=1, sticky=tk.W)
         ttk.Label(frm_main, style="App.TLabel",
                   text="Listen to a sound and see it: waveform, oscilloscope, spectrum.").grid(
-                      row=1, column=0, sticky=tk.W)
+                      row=1, column=1, sticky=tk.W)
 
-        ttk.Separator(frm_main).grid(row=2, column=0, sticky=tk.EW, pady=12)
+        ttk.Separator(frm_main).grid(row=2, column=0, columnspan=2, sticky=tk.EW, pady=12)
 
         facts = (("Version:", "{0}, {1}".format(self.info["version"], self.info["date"])),
                  ("Author:", self.info["author"]),
@@ -63,12 +68,12 @@ class UI(tk.Toplevel):
         link = ttk.Label(frm_facts, style="Link.TLabel", text=self.SOURCE, cursor="hand2")
         link.grid(row=len(facts), column=1, sticky=tk.W, padx=(8, 0))
         link.bind("<Button-1>", self.on_source)
-        frm_facts.grid(row=3, column=0, sticky=tk.W)
+        frm_facts.grid(row=3, column=0, columnspan=2, sticky=tk.W)
 
         buttons = self.engine.tools.get_button_column(frm_main,
                                                       (("Close", self.on_cancel),),
                                                       window=self)
-        buttons.grid(row=4, column=0, sticky=tk.E, pady=(12, 0))
+        buttons.grid(row=4, column=0, columnspan=2, sticky=tk.E, pady=(12, 0))
 
         frm_main.pack(fill=tk.BOTH, expand=1)
 

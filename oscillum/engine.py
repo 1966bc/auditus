@@ -47,6 +47,12 @@ class Engine:
             text = f.read()
         return text
 
+    def get_icons(self, which):
+        """Every size of an icon: its file holds one base64 PNG per line (make_icon.py)."""
+        with open(self.get_file(which), "r") as f:
+            icons = f.read().split()
+        return icons
+
     def open_file(self, path):
         """Open a file with the program the system uses for it."""
         if not os.path.exists(path):

@@ -60,6 +60,8 @@ directly: it works only if nothing else is using it, otherwise it answers
 
 ## Oscillum
 
+<img src="oscillum/icon.png" alt="Oscillum icon" width="64" align="right">
+
 `oscillum/` is the course's sound analyser: open a WAV, listen to it and
 see it at the same time, in three synchronised views.
 

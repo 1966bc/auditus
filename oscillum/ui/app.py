@@ -46,6 +46,7 @@ class App(tk.Tk):
         self.title(title)
         self.engine.tools.set_style(self.THEME)
         self.minsize(700, 560)
+        self.set_icon()
         self.set_info()
 
         self.main = Main(self)
@@ -57,6 +58,13 @@ class App(tk.Tk):
         if files:
             self.after(200, lambda: self.main.load_file(files[0]))
         self.engine.log.trace("ready; the engine holds log, tools, wav, player")
+
+    def set_icon(self):
+        # The icon in 16, 32 and 48 pixels: the window manager picks the
+        # size each place needs, so it is never scaled up and blurred.
+        # Kept on self: a PhotoImage only a local variable points to is collected.
+        self.icons = [tk.PhotoImage(data=data) for data in self.engine.get_icons("app")]
+        self.iconphoto(True, *self.icons)
 
     def set_info(self):
         """The facts the About window shows, from the metadata at the top of this module."""

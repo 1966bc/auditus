@@ -5,11 +5,11 @@
 # licence:  MIT
 # -----------------------------------------------------------------------------
 """
-Struttura di un file MIDI: tracce, strumenti General MIDI, tempo, metrica, durata.
+Structure of a MIDI file: tracks, General MIDI instruments, tempo, metre, duration.
 
-    python3 midinfo.py brano.mid
+    python3 midinfo.py song.mid
 
-Senza librerie esterne. Gli eventi di testo (titoli, testi karaoke) sono solo contati.
+No external libraries. Text events (titles, karaoke lyrics) are only counted.
 """
 
 import struct
@@ -34,7 +34,7 @@ GM = ["Acoustic Grand Piano", "Bright Acoustic Piano", "Electric Grand Piano", "
 def main(path):
     d = open(path, "rb").read()
     fmt, ntrk, div = struct.unpack(">HHH", d[8:14])
-    print(f"formato {fmt}, tracce {ntrk}, risoluzione {div} tick per quarto")
+    print(f"format {fmt}, tracks {ntrk}, resolution {div} ticks per quarter")
 
     def vlq(p):
         v = 0
@@ -85,18 +85,18 @@ def main(path):
                     p += 2
         maxtick = max(maxtick, tick)
         for ch, n in sorted(notes.items()):
-            inst = "batteria" if ch == 9 else (GM[progs[ch]] if progs.get(ch, 999) < len(GM)
-                                               else f"programma {progs.get(ch)}")
-            print(f"  traccia {t} {name!r}, canale {ch + 1}: {inst}, {n} note")
+            inst = "drums" if ch == 9 else (GM[progs[ch]] if progs.get(ch, 999) < len(GM)
+                                               else f"program {progs.get(ch)}")
+            print(f"  track {t} {name!r}, channel {ch + 1}: {inst}, {n} notes")
 
-    print("tempo (tick, bpm):", tempos[:8], "| metrica (tick, misura):", sigs[:8])
+    print("tempo (tick, bpm):", tempos[:8], "| metre (tick, signature):", sigs[:8])
     secs, last, bpm = 0.0, 0, 120
     for tk, b in tempos + [(maxtick, None)]:
         secs += (tk - last) / div * 60 / bpm
         last = tk
         if b:
             bpm = b
-    print(f"durata circa {secs / 60:.1f} minuti; eventi di testo (non mostrati): {texts}")
+    print(f"duration about {secs / 60:.1f} minutes; text events (not shown): {texts}")
 
 
 if __name__ == "__main__":

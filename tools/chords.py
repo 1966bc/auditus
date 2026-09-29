@@ -5,32 +5,32 @@
 # licence:  MIT
 # -----------------------------------------------------------------------------
 """
-Accordi per mezza battuta di una registrazione, scelti tra quelli indicati.
+Chords per half bar of a recording, chosen among the given candidates.
 
-    python3 accordi.py brano.wav --accordi A,D7,E7,F#m,F,D,C#m,Bm,Cm
+    python3 chords.py song.wav --chords A,D7,E7,F#m,F,D,C#m,Bm,Cm
 
-Limitare i candidati agli accordi del brano riduce molto gli errori.
-Confonde facilmente accordi vicini (F#m/F, D/D7): è un aiuto, non una trascrizione.
+Restricting the candidates to the chords of the song cuts errors a lot.
+Close chords (F#m/F, D/D7) are easily confused: an aid, not a transcription.
 """
 
 import argparse
 
 import numpy as np
 
-from analisi import Analysis, chord_template, parse_chord, read_channel
+from analysis import Analysis, chord_template, parse_chord, read_channel
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Accordi per mezza battuta.")
+    ap = argparse.ArgumentParser(description="Chords per half bar.")
     ap.add_argument("wav")
-    ap.add_argument("--accordi", required=True, help="candidati separati da virgole, es. A,D7,F#m")
-    ap.add_argument("--canale", type=int, help="1 = sinistro, 2 = destro (default: il più forte)")
+    ap.add_argument("--chords", required=True, help="comma-separated candidates, e.g. A,D7,F#m")
+    ap.add_argument("--channel", type=int, help="1 = left, 2 = right (default: the loudest)")
     args = ap.parse_args()
 
-    names = [c.strip() for c in args.accordi.split(",") if c.strip()]
+    names = [c.strip() for c in args.chords.split(",") if c.strip()]
     templates = {n: chord_template(*parse_chord(n)) for n in names}
 
-    x, sr = read_channel(args.wav, None if args.canale is None else args.canale - 1)
+    x, sr = read_channel(args.wav, None if args.channel is None else args.channel - 1)
     an = Analysis(x, sr)
     t, s = an.onsets()
     beats = an.beat_grid(t[0], an.global_beat(), t, s)

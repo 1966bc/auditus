@@ -5,8 +5,8 @@
 # licence:  MIT
 # -----------------------------------------------------------------------------
 """
-Funzioni comuni per l'analisi di una registrazione di chitarra: attacchi,
-tempo, griglia dei movimenti, cromagramma. Usate da accenti.py e accordi.py.
+Shared functions to analyse a guitar recording: onsets, tempo, beat grid,
+chromagram. Used by accents.py and chords.py.
 """
 
 import wave
@@ -17,7 +17,7 @@ NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 
 def read_channel(path, channel=None):
-    """Un canale come float in [-1, 1]; di default quello col picco più alto."""
+    """One channel as float in [-1, 1]; by default the one with the highest peak."""
     with wave.open(path) as w:
         width, nch, sr = w.getsampwidth(), w.getnchannels(), w.getframerate()
         raw = w.readframes(w.getnframes())
@@ -29,14 +29,14 @@ def read_channel(path, channel=None):
 
 
 class Analysis:
-    """Spettrogramma a breve termine e tutto ciò che se ne ricava."""
+    """Short-time spectrum and everything derived from it."""
 
     def __init__(self, x, sr, n=4096, hop=512):
         self.sr, self.n, self.hop = sr, n, hop
         frames = np.lib.stride_tricks.sliding_window_view(x, n)[::hop] * np.hanning(n)
         self.spec = np.abs(np.fft.rfft(frames, axis=1))
         self.fps = sr / hop
-        # onset strength: flusso spettrale positivo, meno la sua media mobile
+        # onset strength: positive spectral flux minus its moving average
         mag = np.log1p(100 * self.spec)
         flux = np.concatenate([[0], np.maximum(np.diff(mag, axis=0), 0).sum(axis=1)])
         k = int(self.fps * 0.3)
@@ -44,7 +44,7 @@ class Analysis:
         self._chroma = None
 
     def onsets(self, rel=0.2, min_gap=0.09):
-        """Attacchi: tempi in secondi e intensità."""
+        """Onsets: times in seconds and their strength."""
         f = self.flux
         thr, gap = rel * np.percentile(f, 99), int(min_gap * self.fps)
         idx = [i for i in range(1, len(f) - 1)
@@ -52,14 +52,14 @@ class Analysis:
         return np.array(idx) / self.fps, f[idx]
 
     def global_beat(self, bpm_min=55, bpm_max=100):
-        """Durata del movimento dall'autocorrelazione del flusso spettrale."""
+        """Beat duration from the autocorrelation of the spectral flux."""
         f = self.flux
         ac = np.correlate(f, f, mode="full")[len(f) - 1:]
         lo, hi = int(self.fps * 60 / bpm_max), int(self.fps * 60 / bpm_min)
         return (lo + np.argmax(ac[lo:hi])) / self.fps
 
     def beat_grid(self, start, beat, t, s, follow=0.1):
-        """Griglia adattiva: ogni movimento si aggancia all'attacco più forte vicino."""
+        """Adaptive grid: each beat locks onto the strongest nearby onset."""
         bt, beats = start, []
         while bt < t[-1] + 0.5 * beat:
             near = np.abs(t - bt) < 0.2 * beat
@@ -74,7 +74,7 @@ class Analysis:
 
     @property
     def chroma(self):
-        """Energia per classe di altezza, 0 = Do; banda 70-1200 Hz."""
+        """Energy per pitch class, 0 = C; band 70-1200 Hz."""
         if self._chroma is None:
             freqs = np.fft.rfftfreq(self.n, 1 / self.sr)
             band = (freqs > 70) & (freqs < 1200)
@@ -84,13 +84,13 @@ class Analysis:
         return self._chroma
 
     def segment(self, a, b):
-        """Cromagramma medio e normalizzato tra i tempi a e b."""
+        """Mean, normalised chroma between times a and b."""
         i, j = int(a * self.fps), max(int(b * self.fps), int(a * self.fps) + 1)
         v = self.chroma[i:j].mean(axis=0)
         return v / (np.linalg.norm(v) + 1e-12)
 
     def downbeat_phase(self, beats, per_bar=4):
-        """Su quale movimento cambia di più l'armonia: lì cade l'uno della battuta."""
+        """The beat where harmony changes most: that is where the bar starts."""
         change = np.zeros(per_bar)
         for i in range(1, len(beats) - 1):
             change[i % per_bar] += 1 - self.segment(beats[i - 1], beats[i]) @ \

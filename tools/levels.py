@@ -5,12 +5,12 @@
 # licence:  MIT
 # -----------------------------------------------------------------------------
 """
-Livelli di una registrazione: durata, picco, valore efficace (RMS), saturazione.
+Levels of a recording: duration, peak, RMS, clipping.
 
-    python3 livelli.py registrazione.wav
+    python3 levels.py recording.wav
 
-Legge WAV a 16 o 32 bit, mono o stereo; un canale per riga.
-Obiettivo in registrazione: picco intorno a -12 dBFS, nessun campione saturato.
+Reads 16 or 32 bit WAV, mono or stereo; one line per channel.
+Recording target: peak around -12 dBFS, no clipped samples.
 """
 
 import sys
@@ -25,7 +25,7 @@ def read(path):
         raw = w.readframes(w.getnframes())
     dtype = {2: np.int16, 4: np.int32}.get(width)
     if dtype is None:
-        sys.exit(f"{path}: campioni da {8 * width} bit non gestiti")
+        sys.exit(f"{path}: {8 * width}-bit samples are not supported")
     x = np.frombuffer(raw, dtype=dtype).reshape(-1, nch) / float(2 ** (8 * width - 1))
     return x, sr
 
@@ -36,14 +36,14 @@ def db(v):
 
 def main(path):
     x, sr = read(path)
-    print(f"{path}: {len(x) / sr:.1f} s, {sr} Hz, {x.shape[1]} canali")
+    print(f"{path}: {len(x) / sr:.1f} s, {sr} Hz, {x.shape[1]} channels")
     for ch in range(x.shape[1]):
         s = x[:, ch]
         peak = np.abs(s).max()
         rms = np.sqrt(np.mean(s ** 2))
         clipped = int((np.abs(s) > 0.999).sum())
-        print(f"  canale {ch + 1}: picco {db(peak):6.1f} dBFS, RMS {db(rms):6.1f} dBFS, "
-              f"saturati {clipped}")
+        print(f"  channel {ch + 1}: peak {db(peak):6.1f} dBFS, RMS {db(rms):6.1f} dBFS, "
+              f"clipped {clipped}")
 
 
 if __name__ == "__main__":

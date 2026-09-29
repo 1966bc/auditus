@@ -5,18 +5,18 @@
 # licence:  MIT
 # -----------------------------------------------------------------------------
 """
-Oscillum - un analizzatore di suoni: ascolti un file WAV e intanto lo vedi.
+Oscillum - a sound analyser: listen to a WAV file and see it while it plays.
 
     python3 oscillum.py [file.wav]
 
-Tre viste sincronizzate con l'ascolto:
+Three views, synchronised with playback:
 
-    forma d'onda   tutto il file, canale sinistro e destro, con il cursore
-    oscilloscopio  pochi millisecondi intorno al cursore: l'onda vera e propria
-    spettro        la trasformata di Fourier al cursore: fondamentale e armoniche
+    waveform       the whole file, left and right channel, with the cursor
+    oscilloscope   a few milliseconds around the cursor: the wave itself
+    spectrum       the Fourier transform at the cursor: fundamental and harmonics
 
-Clic sulla forma d'onda per spostare il cursore; barra spaziatrice per suonare
-e fermare. L'audio passa da aplay (PulseAudio), il disegno da un Canvas Tkinter.
+Click on the waveform to move the cursor; space bar to play and stop.
+Audio goes through aplay (PulseAudio), drawing through a Tkinter Canvas.
 """
 
 import os
@@ -45,7 +45,7 @@ DB_FLOOR = -100.0
 
 
 def read_wav(path):
-    """Campioni come float32 in [-1, 1], forma (n, canali), e la frequenza."""
+    """Samples as float32 in [-1, 1], shape (n, channels), and the sample rate."""
     with wave.open(path) as w:
         nch, width, sr = w.getnchannels(), w.getsampwidth(), w.getframerate()
         raw = w.readframes(w.getnframes())
@@ -62,12 +62,12 @@ def read_wav(path):
     elif width == 4:
         x = np.frombuffer(raw, dtype=np.int32).astype(np.float32) / 2 ** 31
     else:
-        raise ValueError(f"campioni da {8 * width} bit non gestiti")
+        raise ValueError(f"{8 * width}-bit samples are not supported")
     return x.reshape(-1, nch), sr
 
 
 class Player:
-    """aplay in un sottoprocesso; i campioni gli arrivano dallo stdin a partire da un punto."""
+    """aplay in a subprocess; samples are fed to its stdin from a given point."""
 
     def __init__(self):
         self.proc = None
@@ -92,7 +92,7 @@ class Player:
             pass
 
     def position(self, sr):
-        """Campione che sta suonando ora, stimato dall'orologio."""
+        """Sample being played now, estimated from the clock."""
         return self.offset + int((time.monotonic() - self.started) * sr)
 
     @property
@@ -120,7 +120,7 @@ class Main(tk.Tk):
         self.cursor = 0
         self.play_from = 0
         self.player = Player()
-        self.overview = None          # immagine della forma d'onda, ricalcolata al resize
+        self.overview = None          # waveform image, redrawn on resize
 
         self.init_ui()
         self.bind("<space>", lambda e: self.on_play_stop())
@@ -133,23 +133,23 @@ class Main(tk.Tk):
     def init_ui(self):
         bar = ttk.Frame(self, padding=4)
         bar.pack(fill=tk.X)
-        ttk.Button(bar, text="Apri…", command=self.on_open).pack(side=tk.LEFT)
-        self.btn_play = ttk.Button(bar, text="▶ Suona", command=self.on_play_stop)
+        ttk.Button(bar, text="Open…", command=self.on_open).pack(side=tk.LEFT)
+        self.btn_play = ttk.Button(bar, text="▶ Play", command=self.on_play_stop)
         self.btn_play.pack(side=tk.LEFT, padx=4)
-        ttk.Label(bar, text="Oscilloscopio:").pack(side=tk.LEFT, padx=(12, 2))
+        ttk.Label(bar, text="Scope:").pack(side=tk.LEFT, padx=(12, 2))
         self.span = tk.StringVar(value="20 ms")
         cb = ttk.Combobox(bar, textvariable=self.span, values=SCOPE_SPANS, width=7, state="readonly")
         cb.pack(side=tk.LEFT)
         cb.bind("<<ComboboxSelected>>", lambda e: self.draw_views())
         self.fit = tk.BooleanVar(value=True)
-        ttk.Checkbutton(bar, text="Adatta", variable=self.fit,
+        ttk.Checkbutton(bar, text="Fit", variable=self.fit,
                         command=self.redraw_all).pack(side=tk.LEFT, padx=(12, 0))
-        self.info = tk.StringVar(value="Apri un file WAV")
+        self.info = tk.StringVar(value="Open a WAV file")
         ttk.Label(bar, textvariable=self.info).pack(side=tk.RIGHT)
 
-        self.cv_wave = self.canvas(160, "Forma d'onda")
-        self.cv_scope = self.canvas(200, "Oscilloscopio")
-        self.cv_spec = self.canvas(240, "Spettro")
+        self.cv_wave = self.canvas(160, "Waveform")
+        self.cv_scope = self.canvas(200, "Oscilloscope")
+        self.cv_spec = self.canvas(240, "Spectrum")
         self.cv_wave.bind("<Button-1>", self.on_seek)
         self.cv_wave.bind("<B1-Motion>", self.on_seek)
         self.bind("<Configure>", lambda e: self.after_idle(self.redraw_all))
@@ -168,7 +168,7 @@ class Main(tk.Tk):
     # file -----------------------------------------------------------------
 
     def on_open(self):
-        path = filedialog.askopenfilename(filetypes=[("WAV", "*.wav"), ("Tutti", "*")])
+        path = filedialog.askopenfilename(filetypes=[("WAV", "*.wav"), ("All files", "*")])
         if path:
             self.load(path)
 
@@ -176,7 +176,7 @@ class Main(tk.Tk):
         try:
             self.samples, self.sr = read_wav(path)
         except Exception as e:
-            messagebox.showerror("Oscillum", f"Non riesco a leggere il file:\n{e}")
+            messagebox.showerror("Oscillum", f"Cannot read the file:\n{e}")
             return
         self.player.stop()
         self.cursor = 0
@@ -185,8 +185,8 @@ class Main(tk.Tk):
         self.peak = peak if peak > 0 else 1.0
         peak_db = 20 * np.log10(peak) if peak > 0 else DB_FLOOR
         self.title(f"Oscillum · {os.path.basename(path)}")
-        self.info.set(f"{self.sr} Hz · {'stereo' if nch == 2 else f'{nch} canali'} · "
-                      f"{n / self.sr:.1f} s · picco {peak_db:.1f} dBFS")
+        self.info.set(f"{self.sr} Hz · {'stereo' if nch == 2 else f'{nch} channels'} · "
+                      f"{n / self.sr:.1f} s · peak {peak_db:.1f} dBFS")
         self.redraw_all()
 
     # disegno --------------------------------------------------------------
@@ -199,12 +199,12 @@ class Main(tk.Tk):
 
     @property
     def gain(self):
-        """Ingrandimento verticale di forma d'onda e oscilloscopio: 1 = fondo scala."""
+        """Vertical zoom of waveform and oscilloscope: 1 = full scale."""
         return 1 / self.peak if self.fit.get() else 1.0
 
     def gain_label(self):
         g = self.gain
-        return "" if g <= 1.01 else f"vista ×{g:.1f} ({20 * np.log10(g):+.0f} dB)"
+        return "" if g <= 1.01 else f"view ×{g:.1f} ({20 * np.log10(g):+.0f} dB)"
 
     def draw_overview(self):
         cv = self.cv_wave
@@ -221,7 +221,7 @@ class Main(tk.Tk):
             x = self.samples[:, c]
             mid = lane_h * (c + 0.5)
             cv.create_line(0, mid, w, mid, fill=GRID)
-            cv.create_text(4, lane_h * c + 2, text="S" if c == 0 else "D", anchor="nw", fill=TEXT)
+            cv.create_text(4, lane_h * c + 2, text="L" if c == 0 else "R", anchor="nw", fill=TEXT)
             colour = LEFT if c == 0 else RIGHT
             for px in range(w):
                 a, b = edges[px], max(edges[px + 1], edges[px] + 1)
@@ -233,7 +233,7 @@ class Main(tk.Tk):
         self.draw_cursor()
 
     def window_start(self, size):
-        """Inizio di una finestra di 'size' campioni intorno al cursore, dentro il file."""
+        """Start of a window of 'size' samples around the cursor, inside the file."""
         return int(min(max(self.cursor - size // 2, 0), max(len(self.samples) - size, 0)))
 
     def draw_cursor(self):
@@ -249,7 +249,7 @@ class Main(tk.Tk):
         self.draw_scope()
         self.draw_spectrum()
         t = self.cursor / self.sr
-        self.status.set(f"cursore {t:6.2f} s")
+        self.status.set(f"cursor {t:6.2f} s")
 
     def draw_scope(self):
         cv = self.cv_scope
@@ -270,7 +270,7 @@ class Main(tk.Tk):
         if len(seg) < 2:
             return
         xs = np.linspace(0, w, len(seg))
-        for c in range(min(seg.shape[1], 2) - 1, -1, -1):   # destro sotto, sinistro sopra
+        for c in range(min(seg.shape[1], 2) - 1, -1, -1):   # right below, left on top
             ys = h / 2 - seg[:, c] * g * (h / 2 - 4)
             pts = np.column_stack([xs, ys]).ravel().tolist()
             cv.create_line(*pts, fill=LEFT if c == 0 else RIGHT)
@@ -286,7 +286,7 @@ class Main(tk.Tk):
         fx = lambda f: left + (np.log10(f) - np.log10(fmin)) / (np.log10(fmax) - np.log10(fmin)) * (w - left - 6)
         dy = lambda db: top + (0 - db) / (0 - DB_FLOOR) * (bottom - top)
 
-        # griglia: ottave dei La e decadi in dB
+        # grid: octaves of A and 20 dB steps
         for f in (27.5, 55, 110, 220, 440, 880, 1760, 3520, 7040, 14080):
             if fmin <= f <= fmax:
                 x = fx(f)
@@ -301,11 +301,11 @@ class Main(tk.Tk):
         if len(seg) < FFT_SIZE:
             seg = np.pad(seg, (0, FFT_SIZE - len(seg)))
         win = np.hanning(FFT_SIZE)
-        mag = np.abs(np.fft.rfft(seg * win)) / (win.sum() / 2)      # 0 dBFS = sinusoide a fondo scala
+        mag = np.abs(np.fft.rfft(seg * win)) / (win.sum() / 2)      # 0 dBFS = full-scale sine
         db = np.maximum(20 * np.log10(np.maximum(mag, 1e-12)), DB_FLOOR)
         freqs = np.fft.rfftfreq(FFT_SIZE, 1 / self.sr)
 
-        # un punto per pixel: il massimo dei bin che vi cadono
+        # one point per pixel: the maximum of its bins
         keep = (freqs >= fmin) & (freqs <= fmax)
         px = fx(freqs[keep]).astype(int)
         vals = db[keep]
@@ -319,10 +319,10 @@ class Main(tk.Tk):
         if len(pts) >= 4:
             cv.create_line(*pts, fill=LEFT)
 
-        # il picco più alto, con la sua frequenza
+        # the highest peak, with its frequency
         k = int(np.argmax(np.where(keep, db, DB_FLOOR - 1)))
         if db[k] > DB_FLOOR + 10:
-            # interpolazione parabolica sul bin del massimo
+            # parabolic interpolation around the peak bin
             if 0 < k < len(db) - 1:
                 y0, y1, y2 = db[k - 1], db[k], db[k + 1]
                 d = 0.5 * (y0 - y2) / (y0 - 2 * y1 + y2) if (y0 - 2 * y1 + y2) != 0 else 0
@@ -330,7 +330,7 @@ class Main(tk.Tk):
                 d = 0
             f_peak = (k + d) * self.sr / FFT_SIZE
             cv.create_text(w - 8, top + 2, anchor="ne", fill=CURSOR,
-                           text=f"picco {f_peak:.1f} Hz · {db[k]:.1f} dBFS")
+                           text=f"peak {f_peak:.1f} Hz · {db[k]:.1f} dBFS")
 
     # ascolto --------------------------------------------------------------
 
@@ -339,7 +339,7 @@ class Main(tk.Tk):
             return
         if self.player.playing:
             self.player.stop()
-            self.btn_play.configure(text="▶ Suona")
+            self.btn_play.configure(text="▶ Play")
             return
         if self.cursor >= len(self.samples) - 1:
             self.cursor = 0
@@ -350,13 +350,13 @@ class Main(tk.Tk):
 
     def tick(self):
         if not self.player.playing:
-            # finito da solo: il cursore torna dove era partito, come un registratore
+            # finished on its own: the cursor goes back to where it started, like a tape recorder
             if self.player.proc is not None:
                 self.player.proc = None
                 self.cursor = self.play_from
                 self.draw_cursor()
                 self.draw_views()
-            self.btn_play.configure(text="▶ Suona")
+            self.btn_play.configure(text="▶ Play")
             return
         self.cursor = min(self.player.position(self.sr), len(self.samples) - 1)
         self.draw_cursor()

@@ -210,7 +210,11 @@ s.append(table([
     ["Canali", "2: sinistro = ingresso 1, destro = ingresso 2"],
     ["Frequenze", "Da 44 100 a 192 000 Hz; 44 100 basta"],
     ["Controlli software", "Nessuno (<font name='M'>amixer -c 1</font> è vuoto): si regola dalle manopole"],
-    ["Riproduzione", "<font name='M'>plughw:1,0</font>, che converte il formato al volo"],
+    ["Riproduzione", "<font name='M'>aplay file.wav</font> passa da PulseAudio (uscita predefinita: "
+                     "la UR22). Con <font name='M'>-D plughw:1,0</font> si scavalca PulseAudio: "
+                     "solo se nient'altro suona"],
+    ["Registrazione", "<font name='M'>arecord -D hw:1,0</font> funziona anche mentre PulseAudio suona: "
+                      "l'ingresso resta libero finché nessun programma usa il microfono"],
 ], [34, 140]))
 
 s.append(KeepTogether([
@@ -219,8 +223,8 @@ s.append(KeepTogether([
     Preformatted("arecord -D hw:1,0 -f S32_LE -c 2 -r 44100 -d 30 prova.wav", code),
     Paragraph("Registrare senza limite, fermando con Ctrl+C (con la voce: GAIN 2 a ore 12):", body),
     Preformatted("arecord -D hw:1,0 -f S32_LE -c 2 -r 44100 brano.wav", code),
-    Paragraph("Riascoltare dalla scheda:", body),
-    Preformatted("aplay -D plughw:1,0 brano.wav", code),
+    Paragraph("Riascoltare (passa da PulseAudio, anche se il browser sta suonando):", body),
+    Preformatted("aplay brano.wav", code),
     Paragraph("Circa 21 MB al minuto. Prima di suonare conta ad alta voce «uno, due, tre, quattro». "
               "Il nome del file è relativo alla cartella in cui ti trovi.", small),
 ]))
@@ -238,6 +242,8 @@ s.append(table([
     ["Picco a 0 dBFS", "Saturazione, spesso cantando", "GAIN 2 verso ore 12"],
     ["Sample format non available", "Manca -f S32_LE", "Usa i comandi delle ricette"],
     ["No such file or directory", "Percorso sbagliato rispetto alla cartella", "Solo il nome del file, o il percorso completo"],
+    ["Device or resource busy", "PulseAudio sta già usando la scheda (browser, Spotify)",
+     "Togli <font name='M'>-D plughw:1,0</font>: <font name='M'>aplay file.wav</font>"],
 ], [46, 56, 72]))
 
 s.append(KeepTogether([

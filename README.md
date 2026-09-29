@@ -36,19 +36,23 @@ Siamo su Linux: i file si ascoltano con `aplay` (pacchetto `alsa-utils`),
 da terminale, senza aprire lettori pesanti.
 
 ```
-aplay suoni/01_la_110.wav                  # sull'uscita predefinita
-aplay -D plughw:1,0 suoni/01_la_110.wav    # su una scheda precisa (qui la card 1)
+aplay suoni/01_la_110.wav                  # attraverso PulseAudio: il modo normale
 aplay -l                                   # elenca le schede e i loro numeri
 ```
 
 Tutti i suoni di una lezione, uno dopo l'altro:
 
 ```
-for f in suoni/*.wav; do echo "$f"; aplay -q -D plughw:1,0 "$f"; done
+for f in suoni/*.wav; do echo "$f"; aplay -q "$f"; done
 ```
 
-`plughw` converte al volo formato e frequenza se la scheda non li supporta
-direttamente. Ctrl+C interrompe l'ascolto.
+Senza `-D` il suono passa da PulseAudio, che lo manda all'uscita predefinita e
+lo mescola con quello che sta già suonando (il browser, Spotify). Ctrl+C
+interrompe l'ascolto.
+
+`aplay -D plughw:1,0 file.wav` scavalca PulseAudio e parla direttamente con la
+scheda 1: funziona solo se nient'altro la sta usando, altrimenti risponde
+`Device or resource busy`.
 
 ## Strumenti
 

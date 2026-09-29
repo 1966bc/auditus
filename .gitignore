@@ -1,0 +1,9 @@
+# suoni generati dagli script delle lezioni: si rigenerano
+lezioni/*/suoni/
+
+# registrazioni personali
+*.wav
+*.flac
+*.mid
+
+__pycache__/

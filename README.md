@@ -2,6 +2,10 @@
 
 *auditus, -us* (Latin): hearing, the act of listening.
 
+**Hear it, then see it: a hands-on course in sound for musicians, with its own analyser.**
+
+![Oscillum showing an A at 110 Hz with its harmonics](oscillum/screenshot.png)
+
 A hands-on course in acoustics and audio for musicians, built on a real home
 setup: a Steinberg UR22mkII interface, a condenser microphone, two desktop
 speakers and a guitar. Each lesson pairs a little theory with a listening test,
@@ -56,7 +60,7 @@ directly: it works only if nothing else is using it, otherwise it answers
 
 ## Oscillum
 
-`oscillum.py` is the course's sound analyser: open a WAV, listen to it and
+`oscillum/` is the course's sound analyser: open a WAV, listen to it and
 see it at the same time, in three synchronised views.
 
 | View | What it shows |
@@ -66,12 +70,20 @@ see it at the same time, in three synchronised views.
 | Spectrum | FFT at the cursor on a logarithmic axis, in dBFS, with the main peak |
 
 ```
-python3 oscillum.py lessons/01_sound_and_hearing/sounds/03_a_harmonics.wav
+python3 oscillum/oscillum.py lessons/01_sound_and_hearing/sounds/03_a_harmonics.wav
+python3 oscillum/oscillum.py --trace file.wav    # and print what it does on the terminal
 ```
 
-Space bar to play and stop, click on the waveform to move. "Fit" zooms
-waveform and oscilloscope to the file's peak; the spectrum stays in absolute
-dBFS. Only Tkinter and numpy; audio goes through `aplay`.
+Space bar to play and stop, click on the waveform to move; when playback
+ends the cursor goes back to where it started, like a tape recorder. "Fit"
+zooms waveform and oscilloscope to the file's peak; the spectrum stays in
+absolute dBFS. Only Tkinter and numpy; audio goes through `aplay`.
+
+It is built the way the author's other Tkinter programs are
+([Tkinterlite](https://github.com/1966bc/Tkinterlite)): an `App` holding a
+`Main` frame, an `Engine` that owns its parts by composition (`tools`, `wav`,
+`player`, `log`), one class per module, each chart a `tk.Canvas` subclass,
+`.format()` strings and one exit per function.
 
 ## Tools
 

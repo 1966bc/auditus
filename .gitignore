@@ -6,4 +6,8 @@ lessons/*/sounds/
 *.flac
 *.mid
 
+# the Oscillum log is written beside the program, and is nobody else's business
+oscillum/oscillum.log*
+
+# compiled Python, rebuilt at every start
 __pycache__/

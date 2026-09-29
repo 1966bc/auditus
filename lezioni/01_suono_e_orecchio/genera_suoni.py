@@ -69,6 +69,17 @@ def main():
          np.concatenate([b, z, 0 * b, z, b]),
          np.concatenate([0 * b, z, b, z, b]))
 
+    # fondamentale mancante: La completo, lo stesso senza fondamentale, 220 Hz puro
+    t2 = np.arange(int(SR * 2.5)) / SR
+    def partials(first):
+        return sum((1 / k) * np.sin(2 * np.pi * 110 * k * t2) for k in range(first, 13))
+    gap = np.zeros(int(SR * 0.6))
+    blocks = [fade(partials(1) / np.abs(partials(1)).max(), 20),
+              fade(partials(2) / np.abs(partials(2)).max(), 20),
+              fade(np.sin(2 * np.pi * 220 * t2), 20)]
+    save("06_fondamentale_mancante.wav",
+         np.concatenate([blocks[0], gap, blocks[1], gap, blocks[2]]))
+
 
 def sweep_frequency(seconds, T=20, f0=20, f1=16000):
     """Frequenza dello sweep al secondo indicato: serve a leggere il limite d'udito."""

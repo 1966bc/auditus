@@ -30,6 +30,26 @@ python3 genera_suoni.py
 aplay suoni/01_la_110.wav
 ```
 
+## Ascoltare
+
+Siamo su Linux: i file si ascoltano con `aplay` (pacchetto `alsa-utils`),
+da terminale, senza aprire lettori pesanti.
+
+```
+aplay suoni/01_la_110.wav                  # sull'uscita predefinita
+aplay -D plughw:1,0 suoni/01_la_110.wav    # su una scheda precisa (qui la card 1)
+aplay -l                                   # elenca le schede e i loro numeri
+```
+
+Tutti i suoni di una lezione, uno dopo l'altro:
+
+```
+for f in suoni/*.wav; do echo "$f"; aplay -q -D plughw:1,0 "$f"; done
+```
+
+`plughw` converte al volo formato e frequenza se la scheda non li supporta
+direttamente. Ctrl+C interrompe l'ascolto.
+
 ## Strumenti
 
 In `strumenti/`, per analizzare le proprie registrazioni:

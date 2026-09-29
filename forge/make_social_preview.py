@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 """Compose the GitHub social preview, docs/social-preview.png.
 
-A build tool, like oscillum/make_icon.py, and like it it needs Pillow. The
+A build tool from the forge, like make_icon.py, and like it it needs Pillow. The
 image is 1280 by 640, the size GitHub asks for, with everything that matters
 kept away from the edges, which some sites crop. The layout is the one of
 calendarium's preview, so the author's projects look like one family.
@@ -19,7 +19,7 @@ lesson 1 with its harmonics.
 GitHub has no API for the social preview: upload the result by hand, in
 Settings > General > Social preview.
 
-    python3 docs/make_social_preview.py
+    python3 forge/make_social_preview.py
 """
 
 import os
@@ -27,8 +27,10 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "oscillum"))
+#: The forge, where this file and make_icon.py live, and the repository above it.
+FORGE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(FORGE)
+sys.path.insert(0, FORGE)
 
 from make_icon import get_image as draw_icon  # noqa: E402
 

@@ -7,15 +7,16 @@
 # -----------------------------------------------------------------------------
 """Draw the Oscillum icon, once, and write it into the file 'app' as base64.
 
-A build tool, not part of the program. It needs Pillow, Oscillum does not:
-the PNGs are drawn when the picture changes and the result is committed.
+A build tool from the forge, not part of the program. It needs Pillow,
+Oscillum does not: the PNGs are drawn when the picture changes and the
+result, oscillum/app and oscillum/icon.png, is committed.
 
 The picture is the screen of an oscilloscope: a rounded square in the blue
 of the keyboard focus, a faint grid, and on it two periods of an A with its
 harmonics - the shape the oscilloscope view shows for the lesson 1 sound.
 It is drawn at eight times each size and reduced, so the edges stay smooth.
 
-    python3 make_icon.py
+    python3 forge/make_icon.py
 
 The file 'app' holds one PNG per line, 16, 32 and 48 pixels: the window
 manager picks the size each place needs, so it is never scaled up and blurred.
@@ -103,12 +104,13 @@ def get_base64(image):
 
 def main():
 
-    here = os.path.dirname(os.path.abspath(__file__))
+    # From the forge to the program: oscillum/ is beside this folder.
+    target = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "oscillum")
     lines = [get_base64(get_image(size)) for size in SIZES]
-    with open(os.path.join(here, "app"), "w") as f:
+    with open(os.path.join(target, "app"), "w") as f:
         f.write("\n".join(lines) + "\n")
-    get_image(256).save(os.path.join(here, "icon.png"))
-    print("app: {0} sizes, icon.png: 256 px".format(len(SIZES)))
+    get_image(256).save(os.path.join(target, "icon.png"))
+    print("{0}: app with {1} sizes, icon.png at 256 px".format(target, len(SIZES)))
 
 
 if __name__ == "__main__":

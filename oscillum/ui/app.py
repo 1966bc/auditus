@@ -37,10 +37,10 @@ class App(tk.Tk):
     WIDTH = 1000
     HEIGHT = 780
 
-    def __init__(self, title, log, files):
+    def __init__(self, title, log, i18n, files):
         super().__init__()
 
-        self.engine = Engine(log)
+        self.engine = Engine(log, i18n)
 
         self.protocol("WM_DELETE_WINDOW", self.on_exit)
         self.title(title)
@@ -57,7 +57,8 @@ class App(tk.Tk):
         # size: the charts draw themselves to the space they have.
         if files:
             self.after(200, lambda: self.main.load_file(files[0]))
-        self.engine.log.trace("ready; the engine holds log, tools, wav, player")
+        self.engine.log.trace("ready in {0}; the engine holds log, i18n, tools, wav, player".format(
+            self.engine.i18n.language))
 
     def set_icon(self):
         # The icon in 16, 32 and 48 pixels: the window manager picks the
@@ -85,11 +86,11 @@ class App(tk.Tk):
         self.engine.log.trace("{0}: {1}".format(exc.__name__, val))
         self.engine.log.exception("{0}: {1}".format(exc.__name__, val))
         messagebox.showerror(self.title(),
-                             "{0}\n\nDetails in {1}".format(val, self.engine.log.path),
+                             self.engine.i18n.get("details").format(val, self.engine.log.path),
                              parent=self)
 
     def on_exit(self, evt=None):
-        if messagebox.askokcancel(self.title(), "Do you want to quit?", parent=self):
+        if messagebox.askokcancel(self.title(), self.engine.i18n.get("quit"), parent=self):
             self.engine.player.stop()
             self.engine.log.trace("player stopped: goodbye")
             self.destroy()

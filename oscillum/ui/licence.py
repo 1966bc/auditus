@@ -21,7 +21,7 @@ class UI(tk.Toplevel):
         self.engine.tools.hide_me(self)
         self.transient(parent)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.title("Licence")
+        self.title(self.engine.i18n.get("licence"))
         self.init_ui()
         self.engine.tools.center_me(self)
 
@@ -35,8 +35,9 @@ class UI(tk.Toplevel):
         self.engine.tools.set_text(self.txt_licence, self.engine.get_license())
         frm_text.pack(fill=tk.BOTH, expand=1)
 
+        close = self.engine.i18n.get("close")
         buttons = self.engine.tools.get_button_column(frm_main,
-                                                      (("Close", self.on_cancel),),
+                                                      ((close, self.on_cancel),),
                                                       window=self)
         buttons.pack(anchor=tk.E, pady=(8, 0))
 

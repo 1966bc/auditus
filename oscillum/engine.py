@@ -22,8 +22,10 @@ class Engine:
     built and tested on its own.
     """
 
-    def __init__(self, log):
+    def __init__(self, log, i18n):
         self.log = log
+        # The words of the interface, in the language chosen at start.
+        self.i18n = i18n
         # Styles and widget helpers.
         self.tools = Tools()
         # The file being looked at.
@@ -32,10 +34,11 @@ class Engine:
         self.player = Player(log)
 
     def __str__(self):
-        return "class: {0}\nparts: log, tools, wav, player".format(self.__class__.__name__)
+        return "class: {0}\nparts: log, i18n, tools, wav, player".format(
+            self.__class__.__name__)
 
     def get_python_version(self):
-        return "Python version:\n{0}".format(".".join(map(str, sys.version_info[:3])))
+        return self.i18n.get("python_version").format(".".join(map(str, sys.version_info[:3])))
 
     def get_file(self, file):
         """A file beside the program, wherever it is started from."""

@@ -79,7 +79,7 @@ class ScopeCanvas(tk.Canvas):
         self.create_text(4, 2, anchor=tk.NW, fill=label, text="+{0:.2f}".format(top))
         self.create_text(4, height - 2, anchor=tk.SW, fill=label, text="-{0:.2f}".format(top))
         self.create_text(width - 4, height - 2, anchor=tk.SE, fill=label,
-                         text="{0} ms, {1:g} ms per division".format(self.span, self.span / 10))
+                         text=self.engine.i18n.get("division").format(self.span, self.span / 10))
 
     def draw_trace(self, width, height):
 

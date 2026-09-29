@@ -162,4 +162,4 @@ class SpectrumCanvas(tk.Canvas):
         if level > self.FLOOR + 10:
             self.create_text(self.winfo_width() - self.RIGHT_MARGIN, self.TOP_MARGIN,
                              anchor=tk.NE, fill=tools.get_rgb(*tools.FOREGROUND),
-                             text="peak {0:.1f} Hz, {1:.1f} dBFS".format(frequency, level))
+                             text=self.engine.i18n.get("peak_at").format(frequency, level))

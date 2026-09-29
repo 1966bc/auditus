@@ -22,9 +22,6 @@ from ui.scope import ScopeCanvas
 from ui.spectrum import SpectrumCanvas
 from ui.waveform import WaveformCanvas
 
-#: What the file dialog offers.
-WILDCARD = [("WAV files", "*.wav"), ("All files", "*.*")]
-
 #: The spans the oscilloscope offers, in milliseconds.
 SPANS = (5, 10, 20, 50, 100)
 
@@ -63,33 +60,36 @@ class Main(ttk.Frame):
         m_file = tk.Menu(m_main, tearoff=0, bd=1)
         m_about = tk.Menu(m_main, tearoff=0, bd=1)
 
-        for label, menu in (("File", m_file), ("?", m_about)):
+        say = self.engine.i18n.get
+
+        for label, menu in ((say("file"), m_file), ("?", m_about)):
             m_main.add_cascade(label=label, underline=0, menu=menu)
 
-        for label, command in (("Open...", self.on_open_file), ("Log", self.on_log)):
+        for label, command in ((say("open_menu"), self.on_open_file), (say("log"), self.on_log)):
             m_file.add_command(label=label, underline=0, command=command)
         m_file.add_separator()
-        m_file.add_command(label="Exit", underline=0, command=self.parent.on_exit)
+        m_file.add_command(label=say("exit"), underline=0, command=self.parent.on_exit)
 
-        for label, command in (("About", self.on_about),
-                               ("Licence", self.on_licence),
-                               ("Python", self.on_python_version),
-                               ("Tkinter", self.on_tkinter_version)):
+        for label, command in ((say("about"), self.on_about),
+                               (say("licence"), self.on_licence),
+                               (say("python"), self.on_python_version),
+                               (say("tkinter"), self.on_tkinter_version)):
             m_about.add_command(label=label, underline=0, command=command)
 
         self.parent.config(menu=m_main)
 
     def init_toolbar(self):
 
+        say = self.engine.i18n.get
         toolbar = ttk.Frame(self, style="App.TFrame", padding=4)
 
-        ttk.Button(toolbar, style="App.TButton", text="Open", underline=0,
+        ttk.Button(toolbar, style="App.TButton", text=say("open"), underline=0,
                    command=self.on_open_file).pack(side=tk.LEFT, padx=2)
-        self.btn_play = ttk.Button(toolbar, style="App.TButton", text="Play", underline=0,
+        self.btn_play = ttk.Button(toolbar, style="App.TButton", text=say("play"), underline=0,
                                    width=6, command=self.on_play)
         self.btn_play.pack(side=tk.LEFT, padx=2)
 
-        ttk.Label(toolbar, style="App.TLabel", text="Oscilloscope").pack(side=tk.LEFT,
+        ttk.Label(toolbar, style="App.TLabel", text=say("oscilloscope")).pack(side=tk.LEFT,
                                                                           padx=(12, 2))
         self.cb_span = self.engine.tools.get_combo(toolbar)
         self.cb_span.configure(width=8)
@@ -98,16 +98,18 @@ class Main(ttk.Frame):
         self.cb_span.bind("<<ComboboxSelected>>", self.on_span)
         self.cb_span.pack(side=tk.LEFT)
 
-        self.chk_fit = ttk.Checkbutton(toolbar, style="App.TCheckbutton", text="Fit",
+        self.chk_fit = ttk.Checkbutton(toolbar, style="App.TCheckbutton", text=say("fit"),
                                        variable=self.fit, command=self.on_fit)
         self.chk_fit.pack(side=tk.LEFT, padx=(12, 0))
 
         toolbar.pack(side=tk.TOP, fill=tk.X)
 
-        # The same keys everywhere in the window, whatever has the focus.
+        # The same keys everywhere in the window, whatever has the focus. The
+        # Alt letters are the first of each word in the language shown, the
+        # one underlined on the button: Open is Alt+O, Apri is Alt+A.
         self.parent.bind_all("<space>", self.on_play)
-        self.parent.bind_all("<Alt-o>", self.on_open_file)
-        self.parent.bind_all("<Alt-p>", self.on_play)
+        self.parent.bind_all("<Alt-{0}>".format(say("open")[0].lower()), self.on_open_file)
+        self.parent.bind_all("<Alt-{0}>".format(say("play")[0].lower()), self.on_play)
 
     def init_status_bar(self):
         """The file on the left, the cursor on the right."""
@@ -124,21 +126,22 @@ class Main(ttk.Frame):
 
     def init_ui(self):
 
+        say = self.engine.i18n.get
         frm_main = ttk.Frame(self, style="App.TFrame", padding=8)
 
-        lbl_waveform = ttk.LabelFrame(frm_main, style="App.TLabelframe", text="Waveform")
+        lbl_waveform = ttk.LabelFrame(frm_main, style="App.TLabelframe", text=say("waveform"))
         self.cnv_waveform = WaveformCanvas(lbl_waveform, self.engine, height=150)
         self.cnv_waveform.pack(fill=tk.BOTH, expand=1)
         self.cnv_waveform.bind("<Button-1>", self.on_seek)
         self.cnv_waveform.bind("<B1-Motion>", self.on_seek)
         lbl_waveform.pack(fill=tk.BOTH, expand=1, pady=(0, 6))
 
-        lbl_scope = ttk.LabelFrame(frm_main, style="App.TLabelframe", text="Oscilloscope")
+        lbl_scope = ttk.LabelFrame(frm_main, style="App.TLabelframe", text=say("oscilloscope"))
         self.cnv_scope = ScopeCanvas(lbl_scope, self.engine, height=190)
         self.cnv_scope.pack(fill=tk.BOTH, expand=1)
         lbl_scope.pack(fill=tk.BOTH, expand=1, pady=(0, 6))
 
-        lbl_spectrum = ttk.LabelFrame(frm_main, style="App.TLabelframe", text="Spectrum")
+        lbl_spectrum = ttk.LabelFrame(frm_main, style="App.TLabelframe", text=say("spectrum"))
         self.cnv_spectrum = SpectrumCanvas(lbl_spectrum, self.engine, height=230)
         self.cnv_spectrum.pack(fill=tk.BOTH, expand=1)
         lbl_spectrum.pack(fill=tk.BOTH, expand=1)
@@ -147,13 +150,16 @@ class Main(ttk.Frame):
 
     def on_open(self, evt=None):
 
-        self.file_text.set("Open a WAV file: File, Open... or Alt+O")
+        say = self.engine.i18n.get
+        self.file_text.set(say("ready").format(say("open")[0].upper()))
         self.cursor_text.set("")
 
     def on_open_file(self, evt=None):
 
-        path = filedialog.askopenfilename(parent=self, title="Open a WAV file...",
-                                          initialdir=os.getcwd(), filetypes=WILDCARD)
+        say = self.engine.i18n.get
+        wildcard = [(say("wav_files"), "*.wav"), (say("all_files"), "*.*")]
+        path = filedialog.askopenfilename(parent=self, title=say("open_title"),
+                                          initialdir=os.getcwd(), filetypes=wildcard)
         if path:
             self.load_file(path)
 
@@ -166,14 +172,15 @@ class Main(ttk.Frame):
         finally:
             self.engine.tools.not_busy(self)
 
+        say = self.engine.i18n.get
         wav = self.engine.wav
         self.parent.title("{0} - {1}".format(self.parent.info["name"], wav.get_name()))
-        channels = "{0} channels".format(wav.get_channels())
+        channels = say("channels").format(wav.get_channels())
         if wav.get_channels() == 1:
-            channels = "mono"
+            channels = say("mono")
         elif wav.get_channels() == 2:
-            channels = "stereo"
-        self.file_text.set("{0}   {1} Hz, {2}, {3:.1f} s, peak {4:.1f} dBFS".format(
+            channels = say("stereo")
+        self.file_text.set(say("file_info").format(
             wav.get_name(), wav.rate, channels, wav.get_duration(), wav.get_peak_db()))
         self.engine.log.trace("{0}: {1} frames".format(path, wav.get_frames()))
 
@@ -194,7 +201,7 @@ class Main(ttk.Frame):
         self.cnv_waveform.set_cursor(frame)
         self.cnv_scope.set_cursor(frame)
         self.cnv_spectrum.set_cursor(frame)
-        self.cursor_text.set("cursor {0:.2f} s".format(frame / self.engine.wav.rate))
+        self.cursor_text.set(self.engine.i18n.get("cursor").format(frame / self.engine.wav.rate))
 
     def on_fit(self, evt=None):
 
@@ -228,14 +235,14 @@ class Main(ttk.Frame):
         self.play_from = self.cursor
         self.engine.player.play(self.engine.wav, self.cursor)
         self.playing = True
-        self.btn_play.configure(text="Stop")
+        self.btn_play.configure(text=self.engine.i18n.get("stop"))
         self.after(TICK, self.follow)
 
     def stop(self):
 
         self.engine.player.stop()
         self.playing = False
-        self.btn_play.configure(text="Play")
+        self.btn_play.configure(text=self.engine.i18n.get("play"))
 
     def follow(self):
         """Move the cursor with the sound, TICK by TICK, on the main loop.
@@ -271,14 +278,13 @@ class Main(ttk.Frame):
         messagebox.showinfo(self.parent.title(), self.engine.get_python_version(), parent=self)
 
     def on_tkinter_version(self):
-        text = "Tkinter patchlevel\n{0}".format(self.tk.call("info", "patchlevel"))
+        text = self.engine.i18n.get("tkinter_version").format(self.tk.call("info", "patchlevel"))
         messagebox.showinfo(self.parent.title(), text, parent=self)
 
     def on_log(self):
         # The log is born with the first error: until then there is nothing to open.
         if self.engine.log.is_empty():
-            messagebox.showinfo(self.parent.title(),
-                                "The log is empty: nothing has gone wrong so far.",
+            messagebox.showinfo(self.parent.title(), self.engine.i18n.get("log_empty"),
                                 parent=self)
         else:
             self.engine.open_log()

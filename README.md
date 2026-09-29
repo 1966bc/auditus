@@ -76,6 +76,10 @@ python3 oscillum/oscillum.py lessons/01_sound_and_hearing/sounds/03_a_harmonics.
 python3 oscillum/oscillum.py --trace file.wav    # and print what it does on the terminal
 ```
 
+It speaks English and Italian: the system's language by default, or the one
+asked for with `--lang=en` or `--lang=it`. The sentences live in
+`oscillum/i18n.py`, one row per sentence and one column per language.
+
 Space bar to play and stop, click on the waveform to move; when playback
 ends the cursor goes back to where it started, like a tape recorder. "Fit"
 zooms waveform and oscilloscope to the file's peak; the spectrum stays in
@@ -86,6 +90,18 @@ It is built the way the author's other Tkinter programs are
 `Main` frame, an `Engine` that owns its parts by composition (`tools`, `wav`,
 `player`, `log`), one class per module, each chart a `tk.Canvas` subclass,
 `.format()` strings and one exit per function.
+
+### Tests
+
+```
+cd oscillum
+python3 -m unittest discover -s tests -v
+```
+
+The standard library's `unittest`, one file per module: translations, WAV
+reading at every sample width, the log, the player's clock and the
+arithmetic of the spectrum. The spectrum tests need a display and are
+skipped without one.
 
 ## Tools
 

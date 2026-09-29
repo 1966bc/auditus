@@ -29,12 +29,13 @@ class UI(tk.Toplevel):
         self.transient(parent)
         self.resizable(0, 0)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.title("About {0}".format(self.info["name"]))
+        self.title(self.engine.i18n.get("about_title").format(self.info["name"]))
         self.init_ui()
         self.engine.tools.center_me(self)
 
     def init_ui(self):
 
+        say = self.engine.i18n.get
         frm_main = ttk.Frame(self, style="App.TFrame", padding=16)
 
         # The largest of the icon's sizes. Kept on self: a PhotoImage that only
@@ -45,16 +46,16 @@ class UI(tk.Toplevel):
         ttk.Label(frm_main, style="Title.TLabel",
                   text=self.info["name"]).grid(row=0, column=1, sticky=tk.W)
         ttk.Label(frm_main, style="App.TLabel",
-                  text="Listen to a sound and see it: waveform, oscilloscope, spectrum.").grid(
+                  text=say("tagline")).grid(
                       row=1, column=1, sticky=tk.W)
 
         ttk.Separator(frm_main).grid(row=2, column=0, columnspan=2, sticky=tk.EW, pady=12)
 
-        facts = (("Version:", "{0}, {1}".format(self.info["version"], self.info["date"])),
-                 ("Author:", self.info["author"]),
-                 ("Licence:", self.info["licence"]),
-                 ("Python:", ".".join(map(str, sys.version_info[:3]))),
-                 ("Tk:", self.tk.call("info", "patchlevel")))
+        facts = ((say("version"), "{0}, {1}".format(self.info["version"], self.info["date"])),
+                 (say("author"), self.info["author"]),
+                 (say("licence_fact"), self.info["licence"]),
+                 (say("python_fact"), ".".join(map(str, sys.version_info[:3]))),
+                 (say("tk_fact"), self.tk.call("info", "patchlevel")))
 
         frm_facts = ttk.Frame(frm_main, style="App.TFrame")
         for row, (label, value) in enumerate(facts):
@@ -63,7 +64,7 @@ class UI(tk.Toplevel):
             ttk.Label(frm_facts, style="App.TLabel", text=value).grid(row=row, column=1,
                                                                      sticky=tk.W, padx=(8, 0))
 
-        ttk.Label(frm_facts, style="App.TLabel", text="Source:").grid(row=len(facts), column=0,
+        ttk.Label(frm_facts, style="App.TLabel", text=say("source")).grid(row=len(facts), column=0,
                                                                       sticky=tk.W)
         link = ttk.Label(frm_facts, style="Link.TLabel", text=self.SOURCE, cursor="hand2")
         link.grid(row=len(facts), column=1, sticky=tk.W, padx=(8, 0))
@@ -71,7 +72,7 @@ class UI(tk.Toplevel):
         frm_facts.grid(row=3, column=0, columnspan=2, sticky=tk.W)
 
         buttons = self.engine.tools.get_button_column(frm_main,
-                                                      (("Close", self.on_cancel),),
+                                                      ((say("close"), self.on_cancel),),
                                                       window=self)
         buttons.grid(row=4, column=0, columnspan=2, sticky=tk.E, pady=(12, 0))
 

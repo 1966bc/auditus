@@ -73,10 +73,10 @@ class WaveformCanvas(tk.Canvas):
             middle = lane_height * (lane + 0.5)
             half = lane_height / 2 * self.FILL * self.gain
             colour = tools.get_rgb(*tools.LEFT)
-            letter = "L"
+            letter = self.engine.i18n.get("left")
             if lane == 1:
                 colour = tools.get_rgb(*tools.RIGHT)
-                letter = "R"
+                letter = self.engine.i18n.get("right")
 
             self.create_line(self.LEFT_MARGIN, middle, width, middle,
                              fill=tools.get_rgb(*tools.GRID))
@@ -93,7 +93,7 @@ class WaveformCanvas(tk.Canvas):
 
         if self.gain > 1.01:
             self.create_text(width - 4, 2, anchor=tk.NE, fill=tools.get_rgb(*tools.LABEL),
-                             text="view x{0:.1f} ({1:+.0f} dB)".format(
+                             text=self.engine.i18n.get("view").format(
                                  self.gain, 20 * np.log10(self.gain)))
         self.draw_cursor()
 

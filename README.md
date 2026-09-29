@@ -54,6 +54,26 @@ interrompe l'ascolto.
 scheda 1: funziona solo se nient'altro la sta usando, altrimenti risponde
 `Device or resource busy`.
 
+## Oscillum
+
+`oscillum.py` è l'analizzatore del corso: apri un WAV, lo ascolti e intanto
+lo vedi, in tre viste sincronizzate.
+
+| Vista | Cosa mostra |
+| --- | --- |
+| Forma d'onda | tutto il file, canale sinistro e destro, con il cursore |
+| Oscilloscopio | da 5 a 100 ms intorno al cursore: l'onda vera e propria |
+| Spettro | FFT al cursore su asse logaritmico, in dBFS, con il picco principale |
+
+```
+python3 oscillum.py lezioni/01_suono_e_orecchio/suoni/03_la_armoniche.wav
+```
+
+Barra spaziatrice per suonare e fermare, clic sulla forma d'onda per
+spostarsi. "Adatta" ingrandisce forma d'onda e oscilloscopio sul picco del
+file; lo spettro resta in dBFS assoluti. Solo Tkinter e numpy; l'audio passa
+da `aplay`.
+
 ## Strumenti
 
 In `strumenti/`, per analizzare le proprie registrazioni:
